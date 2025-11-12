@@ -22,11 +22,6 @@ class Ingredient:
         self.preparation = preparation
         
 
-def parse_url(url):
-    """Parses the given URL and returns its components."""
-    text = ""
-    return text 
-
 def sentence_to_step():
     """Converts a sentence into a step representation."""
     text = ""
