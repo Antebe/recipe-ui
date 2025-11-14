@@ -2,7 +2,9 @@
 
 import re
 from utils import Step 
-from extract import extract_recipe  
+from extract import extract_recipe 
+import spacy 
+nlp = spacy.load("en_core_web_sm")
 
 
 # cooking
@@ -73,9 +75,15 @@ def split_into_atomic_steps(text: str):
 
 
 # we want to normalize before we fix coreference
+# def normalize_ing(ing):
+#     words = re.findall(r"[a-z]+", ing.lower())
+#     return words[-1] if words else ing.lower()
 def normalize_ing(ing):
-    words = re.findall(r"[a-z]+", ing.lower())
-    return words[-1] if words else ing.lower()
+    doc = nlp(ing.lower())
+    # extract nouns and proper nouns
+    nouns = [tok.lemma_ for tok in doc if tok.pos_ in ("NOUN", "PROPN")]
+    return nouns[-1] if nouns else ing.lower()
+
 
 def fix_coreference(sentences, ingredients):
     # Replace pronouns (they, it, them) with last mentioned ingredient.
@@ -148,7 +156,7 @@ def merge_headers_and_broken_phrases(steps):
 
 
 
-# this returns the sentences
+################## we can use this to get atomic sentences ##################
 def get_atomic_sentences(recipe_dict):
     ingredients = recipe_dict["ingredients"]
     raw_steps = recipe_dict["steps"]
@@ -164,64 +172,62 @@ def get_atomic_sentences(recipe_dict):
 
     return atomic_sentences
 
-
-################## this puts our steps as class step ##################
-# def extract_time(text):
-#     m = re.search(r"(\d+)\s*(seconds?|minutes?|hours?)", text, re.I)
-#     return m.group(0) if m else None
-
-# def extract_temp(text):
-#     m = re.search(r"(\d+)\s*(°?F|°?C)", text, re.I)
-#     return m.group(0) if m else None
-
-# def extract_methods(text):
-#     words = text.lower().split()
-#     primary = [w for w in words if w in COOKING_VERBS]
-#     secondary = []  # optional extension
-#     return primary, secondary
-
-# TOOLS = ["bowl","pan","pot","skillet","knife","oven","sheet","whisk","spatula"]
-
-# def extract_tools(text):
-#     return [t for t in TOOLS if t in text.lower()]
-
-# def match_ingredients(text, ingredients):
-#     result = []
-#     for ing in ingredients:
-#         core = normalize_ing(ing)
-#         if core in text.lower():
-#             result.append(ing)
-#     return result
+## start normalizing ingredients
+def normalize_ingredient(ing):
+    # Extract the core ingredient name from the full ingredient string.
+    doc = nlp(ing.lower())
+    nouns = [tok.lemma_ for tok in doc if tok.pos_ in ("NOUN", "PROPN")]
+    return nouns[-1] if nouns else ing.lower()
 
 
-# # here we actually build the step objects
-# def build_step_objects(recipe_dict):
-#     ingredients = recipe_dict["ingredients"]
-#     atomic = get_atomic_sentences(recipe_dict)
+def sentence_lemmas(text):
+    # Convert step sentence into a set of lemma tokens.
+    doc = nlp(text.lower())
+    return {tok.lemma_ for tok in doc if tok.is_alpha}
 
-#     steps = []
-#     for i, text in enumerate(atomic, start=1):
-#         primary, secondary = extract_methods(text)
-#         time = extract_time(text)
-#         temp = extract_temp(text)
-#         tools = extract_tools(text)
-#         ings = match_ingredients(text, ingredients)
+# helps normalize ingredients
+def clean_ingredient_name(ing: str):
+    # Remove trailing preparation notes like ', divided' but keep ingredient name.
+    # split off after comma
+    base = ing.split(",")[0].strip()
+    return base
 
-#         steps.append(
-#             Step(
-#                 step_number=i,
-#                 text=text,
-#                 ingredients=ings,
-#                 tools=tools,
-#                 methods_primary=primary,
-#                 methods_secondary=secondary,
-#                 time=time,
-#                 temperature=temp,
-#                 context=None
-#             )
-#         )
 
-#     return steps
+# this helps collect ingredients
+def match_ingredients(text, ingredients):
+    result = []
+    for ing in ingredients:
+        core = normalize_ing(ing)
+        if core in text.lower():
+            clean = clean_ingredient_name(ing)
+            result.append(clean)
+    return result
+
+
+
+################## we can use this to get ingredients in each step ##################
+def get_ingredients_by_step(recipe_dict):
+    atomic_steps = get_atomic_sentences(recipe_dict)
+    ingredients = recipe_dict["ingredients"]
+
+    final = []
+    for _, step_text in enumerate(atomic_steps, start=1):
+        final.append(match_ingredients(step_text, ingredients))
+
+    return final
+
+################## this puts all ingredients into one list ##################
+def collect_all_ingredients(matches_per_step):
+    seen = set()
+    final = []
+
+    for step_list in matches_per_step:
+        for ing in step_list:
+            if ing not in seen:
+                seen.add(ing)
+                final.append(ing)
+
+    return final
 
 
 # testing
@@ -230,12 +236,12 @@ if __name__ == "__main__":
 
     url = input("Enter recipe URL: ")
     recipe = extract_recipe(url)
-
+    
     atomic = get_atomic_sentences(recipe)
     print("\nATOMIC SENTENCES:")
-    print(atomic)
+    for i, s in enumerate(atomic, 1):
+        print(f"{i}: {s}")
 
-    # print("\nSTEP OBJECTS:")
-    # objs = build_step_objects(recipe)
-    # for obj in objs:
-    #     print(obj.step_number, obj.text, obj.ingredients, obj.methods_primary)
+    matches = get_ingredients_by_step(recipe)
+
+    print(collect_all_ingredients(matches))
