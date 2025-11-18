@@ -2,7 +2,7 @@ from answer import answer
 def main():
     print("=== Recipe Chat CLI ===")
     print("Type 'exit' to quit.\n")
-
+    
     while True:
         try:
             user_input = input("User: ")
