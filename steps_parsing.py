@@ -1,7 +1,11 @@
 # steps_parsing.py
 
 import re
+<<<<<<< HEAD
 #from utils import Step 
+=======
+# from utils import Step 
+>>>>>>> 7c919718b8925616bf2ad1fc9c4b89b774823962
 from extract import extract_recipe 
 import spacy 
 nlp = spacy.load("en_core_web_sm")
@@ -154,6 +158,25 @@ def merge_headers_and_broken_phrases(steps):
 
     return merged
 
+def is_non_step(line: str):
+    """
+    Returns True if the line is clearly NOT a real cooking step.
+    We filter:
+        - author credits like "Recipe by ..."
+        - "Recipe developed by ..."
+    """
+    low = line.lower()
+
+    # remove obvious metadata lines
+    if low.startswith("recipe by"):
+        return True
+    if low.startswith("recipe developed by"):
+        return True
+    if low.startswith("author:"):
+        return True
+
+    return False
+
 
 
 ################## we can use this to get atomic sentences ##################
@@ -169,6 +192,12 @@ def get_atomic_sentences(recipe_dict):
 
     # merge headers and broken phrases
     atomic_sentences = merge_headers_and_broken_phrases(atomic_sentences)
+
+    # --- NEW FILTER HERE ---
+    atomic_sentences = [
+        s for s in atomic_sentences 
+        if not is_non_step(s)
+    ]
 
     return atomic_sentences
 
@@ -230,6 +259,61 @@ def collect_all_ingredients(matches_per_step):
     return final
 
 
+
+def parse_iso8601_time(iso_str):
+    """
+    Convert ISO 8601 duration strings (e.g., 'PT55M', 'PT1H30M')
+    into a human-readable format.
+    """
+    if not iso_str or not isinstance(iso_str, str):
+        return None
+    
+    # ISO-8601 pattern
+    match = re.match(r"PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?", iso_str)
+    if not match:
+        return iso_str  # fallback, return raw string
+
+    hours = match.group(1)
+    minutes = match.group(2)
+    seconds = match.group(3)
+
+    parts = []
+    if hours:
+        parts.append(f"{int(hours)} hour" + ("s" if int(hours) != 1 else ""))
+    if minutes:
+        parts.append(f"{int(minutes)} minute" + ("s" if int(minutes) != 1 else ""))
+    if seconds:
+        parts.append(f"{int(seconds)} second" + ("s" if int(seconds) != 1 else ""))
+
+    return " ".join(parts) if parts else None
+
+
+
+################## recipe times and servings ##################
+def get_recipe_times(recipe_dict):
+    """
+    Return a dictionary with recipe-level metadata:
+    - total time (clean, human readable)
+    - number of servings
+    """
+
+    total_time = recipe_dict.get("total_time")
+    servings   = recipe_dict.get("servings")
+
+    # Handle servings stored as list
+    if isinstance(servings, list):
+        servings = servings[0] if servings else None
+
+    # Parse total time into human-readable form
+    total_time = parse_iso8601_time(total_time)
+
+    return {
+        "total_time": total_time,
+        "servings": servings
+    }
+
+
+
 # testing
 if __name__ == "__main__":
     
@@ -245,3 +329,9 @@ if __name__ == "__main__":
     matches = get_ingredients_by_step(recipe)
 
     print(collect_all_ingredients(matches))
+    meta = get_recipe_times(recipe)
+
+    print("\nRECIPE METADATA:")
+    print("Total Time:", meta["total_time"])
+    print("Servings:", meta["servings"])
+

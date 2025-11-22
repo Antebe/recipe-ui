@@ -45,16 +45,10 @@ def is_recipe(obj: dict) -> bool:
 
 
 def extract_fields(ld_obj: dict):
-    # Convert the JSON-LD recipe block into a clean Python dict.
-
     title = ld_obj.get("name", "Untitled Recipe")
-
     ingredients = ld_obj.get("recipeIngredient", [])
 
-    # recipeInstructions can be:
-    # 1. A list of dicts with "text"
-    # 2. A list of strings
-    # 3. A single string
+    # JSON-LD instructions (as before)
     raw = ld_obj.get("recipeInstructions", [])
     steps = []
 
@@ -64,19 +58,29 @@ def extract_fields(ld_obj: dict):
                 txt = item.get("text", "").strip()
                 if txt:
                     steps.append(txt)
-            elif isinstance(item, str):
-                if item.strip():
-                    steps.append(item.strip())
+            elif isinstance(item, str) and item.strip():
+                steps.append(item.strip())
     else:
-        # fallback — treat as a single text blob
-        if raw and isinstance(raw, str):
+        if isinstance(raw, str) and raw.strip():
             steps = [raw.strip()]
+
+    # NEW — Extract metadata
+    servings = ld_obj.get("recipeYield")
+    total_time = ld_obj.get("totalTime")
+    prep_time = ld_obj.get("prepTime")
+    cook_time = ld_obj.get("cookTime")
 
     return {
         "title": title,
         "ingredients": ingredients,
-        "steps": steps
+        "steps": steps,
+        "servings": servings,
+        "total_time": total_time,
+        "prep_time": prep_time,
+        "cook_time": cook_time
     }
+
+
 
 
 def extract_recipe(url: str):
