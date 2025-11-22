@@ -1,7 +1,7 @@
 # steps_parsing.py
 
 import re
-from utils import Step 
+#from utils import Step 
 from extract import extract_recipe 
 import spacy 
 nlp = spacy.load("en_core_web_sm")

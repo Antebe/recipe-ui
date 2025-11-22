@@ -59,7 +59,7 @@ S -> WHATIS
 S -> SUBSTITUTE
 S -> MISSING
 S -> DIET
-S -> AHEAD
+S -> AHEAD_Q
 S -> STORAGE
 S -> TROUBLE
 S -> SAFETY
@@ -71,25 +71,36 @@ S -> HOWTO_VAGUE
 
 HOWTO_SPEC -> HOW TO PHRASE
 WHATIS    -> WHAT IS PHRASE
-SUBSTITUTE -> WHAT CAN I USE INSTEAD OF PHRASE
-SUBSTITUTE -> SUB FOR PHRASE
-MISSING   -> I DONT HAVE PHRASE WHAT CAN I USE
+
+SUBSTITUTE -> WHAT_CAN_I_USE_INSTEAD_OF PHRASE
+SUBSTITUTE -> SUB_FOR PHRASE
+
+MISSING   -> I_DONT_HAVE PHRASE WHAT CAN I USE
+
 DIET      -> CONSTRAINT ALT FOR PHRASE
-AHEAD     -> CAN I MAKE THIS AHEAD
-AHEAD     -> MARINATE OVERNIGHT
-STORAGE   -> HOW LONG DOES IT KEEP
-STORAGE   -> CAN I FREEZE THIS
+
+AHEAD_Q     -> CAN_I_MAKE_THIS_AHEAD
+AHEAD_Q     -> MARINATE_OVERNIGHT
+
+STORAGE   -> HOW_LONG_DOES_IT_KEEP
+STORAGE   -> CAN_I_FREEZE_THIS
+
 TROUBLE   -> PHRASE TOO ISSUE
 TROUBLE   -> ISSUE PHRASE
-SAFETY    -> SAFE TEMP FOR PHRASE
-SAFETY    -> IS PHRASE SAFE
+
+SAFETY    -> SAFE_TEMP_FOR PHRASE
+SAFETY    -> IS_PHRASE_SAFE
+
 CONVERT   -> PHRASE TO PHRASE
-TOOL_DEF  -> WHAT IS A PHRASE
+
+TOOL_DEF  -> WHAT_IS_A PHRASE
 TOOL_SUB  -> NO PHRASE WHAT CAN I USE
-SIZE      -> WHAT SIZE PHRASE
+
+SIZE      -> WHAT_SIZE PHRASE
 SIZE      -> SIZE_NUMBER OK
 
-# Lexical items (loosely)
+# ----- Lexical -----
+
 HOW -> 'how'
 TO -> 'to'
 WHAT -> 'what'
@@ -104,46 +115,54 @@ SUB -> 'sub'
 FOR -> 'for'
 DONT -> "don't"
 HAVE -> 'have'
+
 CONSTRAINT -> 'gluten-free' | 'dairy-free' | 'vegetarian' | 'vegan'
 ALT -> 'alternative' | 'substitute' | 'option'
+
 MAKE -> 'make'
 THIS -> 'this'
 AHEAD -> 'ahead'
+
 MARINATE -> 'marinate'
 OVERNIGHT -> 'overnight'
-HOW_LONG -> 'how' | 'how' 'long'
+
+HOW_LONG -> 'how' 'long'
 DOES -> 'does'
 IT -> 'it'
 KEEP -> 'keep'
+
 FREEZE -> 'freeze'
+
 SAFE -> 'safe'
 TEMP -> 'temp' | 'temperature'
+
 NO -> 'no'
 OK -> 'ok'
-IS_WORD -> 'is'
+
 PHRASE -> PHRASE WORD | WORD
+
 ISSUE -> 'thin' | 'thick' | 'burning' | 'sticky' | 'dry' | 'watery' | 'salty' | 'bland' | 'not' 'melting'
+
 SIZE_NUMBER -> '8x8' | '9x9' | '9x13' | '12-inch' | '10-inch' | '11x7'
 
-# Helper rules for fixed questions
-HOW LONG -> 'how' 'long'
-HOW LONG DOES IT KEEP -> 'how' 'long' 'does' 'it' 'keep'
-CAN I FREEZE THIS -> 'can' 'i' 'freeze' 'this'
-SAFE TEMP FOR -> 'safe' 'temp' 'for'
-IS PHRASE SAFE -> 'is' PHRASE 'safe'
-CAN I MAKE THIS AHEAD -> 'can' 'i' 'make' 'this' 'ahead'
-MARINATE OVERNIGHT -> 'marinate' 'overnight'
-WHAT CAN I USE INSTEAD OF -> 'what' 'can' 'i' 'use' 'instead' 'of'
-SUB FOR -> 'sub' 'for'
-I DONT HAVE -> 'i' "don't" 'have'
-WHAT SIZE -> 'what' 'size'
-WHAT IS A -> 'what' 'is' 'a'
-HOW DO I DO THAT -> 'how' 'do' 'i' 'do' 'that'
-
-# Generic tokens
 WORD -> /[a-zA-Z0-9+\-°]+/
-TO -> 'to'
+
+# ----- Fixed multi-token nonterminals -----
+
+HOW_LONG_DOES_IT_KEEP -> 'how' 'long' 'does' 'it' 'keep'
+CAN_I_FREEZE_THIS -> 'can' 'i' 'freeze' 'this'
+SAFE_TEMP_FOR -> 'safe' 'temp' 'for'
+IS_PHRASE_SAFE -> 'is' PHRASE 'safe'
+CAN_I_MAKE_THIS_AHEAD -> 'can' 'i' 'make' 'this' 'ahead'
+MARINATE_OVERNIGHT -> 'marinate' 'overnight'
+WHAT_CAN_I_USE_INSTEAD_OF -> 'what' 'can' 'i' 'use' 'instead' 'of'
+SUB_FOR -> 'sub' 'for'
+I_DONT_HAVE -> 'i' "don't" 'have'
+WHAT_SIZE -> 'what' 'size'
+WHAT_IS_A -> 'what' 'is' 'a'
+HOWTO_VAGUE -> 'how' 'do' 'i' 'do' 'that'
 """
+
 
 # Build the parser once
 _cfg = CFG.fromstring(GRAMMAR)
