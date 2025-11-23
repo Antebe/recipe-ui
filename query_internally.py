@@ -92,6 +92,13 @@ def answer_recipe_question(question: str, recipe: Recipe, step_id: Optional[int]
                 last_ing = current_step.ingredients[-1]
                 return format_ingredient_quantity(last_ing)
             return "No ingredients mentioned in this step."
+    # 4. INGREDIENT LIST QUESTIONS - "what are the ingredients?"
+    if any(phrase in question_lower for phrase in ["what are the ingredients", "show ingredients", "list ingredients", "what ingredients"]):
+        if recipe.ingredients:
+            ing_list = ", ".join(ing.raw for ing in recipe.ingredients)
+            return f"Ingredients: {ing_list}"
+        return "No ingredients listed."
+        
     
     return "I'm not sure how to answer that question."
 
