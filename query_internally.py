@@ -2,6 +2,10 @@
 # from typing import Optional
 # import spacy
 from utils import *
+import re
+import spacy
+from typing import Optional
+
 
 nlp = spacy.load("en_core_web_sm")
 
@@ -128,11 +132,135 @@ def format_ingredient_quantity(ingredient: Ingredient) -> str:
         return " ".join(parts)
     else:
         return ingredient.raw if ingredient.raw else "Amount not specified"
+
+
+########## navigation questions #############
+
+ORDINAL_MAP = {
+    "first": 1, "1st": 1,
+    "second": 2, "2nd": 2,
+    "third": 3, "3rd": 3,
+    "fourth": 4, "4th": 4,
+    "fifth": 5,  "5th": 5,
+    "sixth": 6,  "6th": 6,
+    "seventh": 7, "7th": 7,
+    "eighth": 8,  "8th": 8,
+    "ninth": 9,  "9th": 9,
+    "tenth": 10, "10th": 10
+}
+
+
+def answer_navigation_question(
+    question: str,
+    recipe: Recipe,
+    step_id: Optional[int]
+) -> tuple[str, Optional[int]]:
+    """
+    Handles navigation / progression questions:
+        - show recipe / show ingredients / show steps
+        - next / previous / repeat
+        - go to step N / jump to the third step
+        - where am I / what step / how many steps
     
+    Returns:
+        (answer_string, updated_step_id)
+    """
+    
+    q = question.lower().strip()
+
+    # load, show commands
+    if any(phrase in q for phrase in [
+        "show recipe", "show me the recipe",
+        "display recipe", "load recipe",
+        "what's the title", "what is the title", "show title"
+    ]):
+        return (f"The recipe title is: {recipe.title}", step_id)
+
+    if "show ingredients" in q or "list ingredients" in q:
+        ing_list = ", ".join(ing.raw for ing in recipe.ingredients)
+        return (f"Ingredients: {ing_list}", step_id)
+
+    if ("show steps" in q or "list steps" in q):
+        out = []
+        for s in recipe.steps:
+            out.append(f"{s.step_number}. {s.text}")
+        return ("\n".join(out), 1)
+
+    if re.search(r"(read|show) step \d+", q):
+        m = re.search(r"step (\d+)", q)
+        if m:
+            n = int(m.group(1))
+            if 1 <= n <= len(recipe.steps):
+                step_id = n
+                return (f"Step {n}: {recipe.steps[n-1].text}", step_id)
+            return ("That step number is out of range.", step_id)
+
+    # NEXT / PREVIOUS / REPEAT / GOTO N
+    # NEXT
+    if q in {"next", "next step"}:
+        if step_id is None:
+            step_id = 1
+        elif step_id < len(recipe.steps):
+            step_id += 1
+        return (f"Step {step_id}: {recipe.steps[step_id-1].text}", step_id)
+
+    # PREVIOUS / BACK
+    if q in {"previous", "back", "go back"}:
+        if step_id is None or step_id <= 1:
+            step_id = 1
+        else:
+            step_id -= 1
+        return (f"Step {step_id}: {recipe.steps[step_id-1].text}", step_id)
+
+    # REPEAT
+    if q in {"repeat", "again"}:
+        if step_id is None:
+            return ("We are not on a step yet.", None)
+        return (f"Repeating Step {step_id}: {recipe.steps[step_id-1].text}", step_id)
+
+    # "jump to the third step"
+    for word, num in ORDINAL_MAP.items():
+        if word in q:
+            if 1 <= num <= len(recipe.steps):
+                step_id = num
+                return (f"Step {num}: {recipe.steps[num-1].text}", step_id)
+            return ("That step number is out of range.", step_id)
+
+    # "step 5"
+    m = re.search(r"step (\d+)", q)
+    if m:
+        num = int(m.group(1))
+        if 1 <= num <= len(recipe.steps):
+            step_id = num
+            return (f"Step {num}: {recipe.steps[num-1].text}", step_id)
+        return ("That step number is out of range.", step_id)
+
+    # PROGRESS / CONTEXT QUERIES
+    if any(phrase in q for phrase in ["where am i", "what step", "current step"]):
+        if step_id is None:
+            return ("You haven't started the recipe yet.", None)
+        return (f"You are on step {step_id}.", step_id)
+
+    if "how many steps" in q or "steps total" in q:
+        total = len(recipe.steps)
+        return (f"The recipe has {total} steps.", step_id)
+
+    if "what's left" in q or "what is left" in q:
+        if step_id is None:
+            return (f"All {len(recipe.steps)} steps are left.", None)
+        remaining = recipe.steps[step_id:]
+        summary = ", ".join(f"Step {s.step_number}" for s in remaining)
+        return (f"Remaining steps: {summary}", step_id)
+
+    # If not recognized:
+    return ("I'm not sure how to navigate based on that question.", step_id)
+
+
 
 if __name__ == "__main__":
     recipe_url = "https://www.allrecipes.com/recipe/236703/chef-johns-chicken-kiev/"
     R = url_to_recipe(recipe_url)
+
 
     print("\nSTRUCTURED RECIPE:")
     
@@ -221,3 +349,33 @@ if __name__ == "__main__":
     q13 = "How much salt do I need?"
     print(f"\nQ (at step 2): {q13}")
     print(f"A: {answer_recipe_question(q13, R, step_id=2)}")
+
+
+
+    ########## navigation questions ########
+    print("\n" + "="*60)
+    print("NAVIGATION QUESTION EXAMPLES")
+    print("="*60)
+
+    nav_tests = [
+        "show the recipe",
+        "show ingredients",
+        "show steps",
+        "read step 2",
+        "next",
+        "next",
+        "repeat",
+        "previous",
+        "step 5",
+        "jump to the third step",
+        "where am I",
+        "how many steps",
+        "what's left",
+    ]
+
+    current = None
+    for q in nav_tests:
+        ans, current = answer_navigation_question(q, R, current)
+        print(f"\nQ: {q}")
+        print(f"A: {ans}")
+        print(f"(new step = {current})")
