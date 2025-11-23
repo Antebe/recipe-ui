@@ -101,7 +101,9 @@ def extract_recipe(url: str):
 if __name__ == "__main__":
     url = input("Enter AllRecipes URL: ").strip()
     recipe = extract_recipe(url)
+    fields = extract_fields(recipe)
 
+    print(fields)
     print("\nTITLE:", recipe["title"])
     print("\nINGREDIENTS:")
     for ing in recipe["ingredients"]:

@@ -167,6 +167,15 @@ def url_to_recipe(url: str) -> Recipe:
     for i, s in enumerate(atomic, 1):
         print(f"{i}: {s}")
 
+
+    fields = get_recipe_times(recipe)
+    print(fields)
+
+    R.cook_time = fields.get("cook_time", None)
+    R.prep_time = fields.get("prep_time", None)
+    R.total_time = fields.get("total_time", None)
+    R.servings = fields.get("servings", None)
+
     matches = get_ingredients_by_step(recipe)
     ingredients = collect_all_ingredients(matches)
     for ing in ingredients:
@@ -223,7 +232,7 @@ def url_to_recipe(url: str) -> Recipe:
     return R
 
 if __name__ == "__main__":
-    recipe_url = "https://www.allrecipes.com/recipe/8934/garlic-chicken-stir-fry/"
+    recipe_url = "https://www.allrecipes.com/recipe/23600/worlds-best-lasagna/"
     R = url_to_recipe(recipe_url)
 
     print("\nSTRUCTURED RECIPE:")
