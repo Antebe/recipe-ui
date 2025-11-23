@@ -163,13 +163,13 @@ def url_to_recipe(url: str) -> Recipe:
     recipe_url = url
     recipe = extract_recipe(recipe_url)
     atomic = get_atomic_sentences(recipe)
-    print("\nATOMIC SENTENCES:")
-    for i, s in enumerate(atomic, 1):
-        print(f"{i}: {s}")
+    # print("\nATOMIC SENTENCES:")
+    # for i, s in enumerate(atomic, 1):
+    #     print(f"{i}: {s}")
 
 
     fields = get_recipe_times(recipe)
-    print(fields)
+    # print(fields)
 
     R.cook_time = fields.get("cook_time", None)
     R.prep_time = fields.get("prep_time", None)
@@ -230,6 +230,16 @@ def url_to_recipe(url: str) -> Recipe:
         step.ingredients = matched_ingredients
     
     return R
+
+class RecipeState:
+    """Tracks the user's position within a recipe."""
+    def __init__(self, recipe: Recipe):
+        self.recipe = recipe
+        self.current_step = 1
+
+    def total_steps(self):
+        return len(self.recipe.steps)
+
 
 if __name__ == "__main__":
     recipe_url = "https://www.allrecipes.com/recipe/23600/worlds-best-lasagna/"
