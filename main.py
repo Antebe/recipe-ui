@@ -49,5 +49,6 @@ def main():
 
 if __name__ == "__main__":
     # R = url_to_recipe("https://www.allrecipes.com/recipe/219077/chef-johns-perfect-mashed-potatoes/")
-    # print(R.ingredients)
+    # for ing in R.ingredients:
+    #     print(ing)
     main()

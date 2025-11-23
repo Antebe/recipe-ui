@@ -6,7 +6,15 @@ import re
 import spacy
 from typing import Optional
 
+class RecipeState:
+    """Tracks the user's position within a recipe."""
+    def __init__(self, recipe: Recipe):
+        self.recipe = recipe
+        self.current_step = 1
 
+    def total_steps(self):
+        return len(self.recipe.steps)
+    
 nlp = spacy.load("en_core_web_sm")
 
 def answer_recipe_question(question: str, recipe: Recipe, step_id: Optional[int] = None) -> str:

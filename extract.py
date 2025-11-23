@@ -99,7 +99,8 @@ def extract_recipe(url: str):
 
 
 if __name__ == "__main__":
-    url = input("Enter AllRecipes URL: ").strip()
+    #url = input("Enter AllRecipes URL: ").strip()
+    url = "https://www.allrecipes.com/recipe/236703/chef-johns-chicken-kiev/"
     recipe = extract_recipe(url)
     fields = extract_fields(recipe)
 

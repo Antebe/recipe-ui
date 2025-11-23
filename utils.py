@@ -110,6 +110,7 @@ UNITS = {
     "ounce", "ounces",
     "gram", "grams",
     "kilogram", "kilograms",
+    "pinch", "pinches"
 }
 
 def text_to_ingredient(text):
@@ -163,38 +164,38 @@ def url_to_recipe(url: str) -> Recipe:
     recipe_url = url
     recipe = extract_recipe(recipe_url)
     atomic = get_atomic_sentences(recipe)
-    # print("\nATOMIC SENTENCES:")
-    # for i, s in enumerate(atomic, 1):
-    #     print(f"{i}: {s}")
+    print("\nATOMIC SENTENCES:")
+    for i, s in enumerate(atomic, 1):
+        print(f"{i}: {s}")
 
-
+     
     fields = get_recipe_times(recipe)
-    # print(fields)
+    print(fields)
 
     R.cook_time = fields.get("cook_time", None)
     R.prep_time = fields.get("prep_time", None)
     R.total_time = fields.get("total_time", None)
     R.servings = fields.get("servings", None)
 
-    matches = get_ingredients_by_step(recipe)
-    ingredients = collect_all_ingredients(matches)
+    #matches = get_ingredients_by_step(recipe)
+    ingredients = recipe['ingredients']
     for ing in ingredients:
         R.ingredients.append(text_to_ingredient(ing))
     for i, step_text in enumerate(atomic, 1):
         R.steps.append(sentence_to_step(step_text, step_number=i))
 
     # Match ingredients to steps with partial quantity extraction
-    for step in R.steps:
-        step_text_lower = step.text.lower()
-        step_doc = nlp(step.text)
-        matched_ingredients = []
-        
-        for ingredient in R.ingredients:
-            if not ingredient.name:
-                continue
-                
-            ing_name_lower = ingredient.name.lower()
-            pattern = r'\b' + re.escape(ing_name_lower) + r'\b'
+    for step in R.steps:                            
+        step_text_lower = step.text.lower()                         
+        step_doc = nlp(step.text)                                   
+        matched_ingredients = []                                    
+
+        for ingredient in R.ingredients:                            
+            if not ingredient.name:                                 
+                continue                                            
+
+            ing_name_lower = ingredient.name.lower()                        
+            pattern = r'\b' + re.escape(ing_name_lower) + r'(es|s)?\b'               
             
             if re.search(pattern, step_text_lower):
                 # Check if there's a partial quantity mentioned in the step
@@ -230,16 +231,6 @@ def url_to_recipe(url: str) -> Recipe:
         step.ingredients = matched_ingredients
     
     return R
-
-class RecipeState:
-    """Tracks the user's position within a recipe."""
-    def __init__(self, recipe: Recipe):
-        self.recipe = recipe
-        self.current_step = 1
-
-    def total_steps(self):
-        return len(self.recipe.steps)
-
 
 if __name__ == "__main__":
     recipe_url = "https://www.allrecipes.com/recipe/23600/worlds-best-lasagna/"

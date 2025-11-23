@@ -313,7 +313,8 @@ def get_recipe_times(recipe_dict):
 if __name__ == "__main__":
     
 
-    url = input("Enter recipe URL: ")
+    #url = input("Enter recipe URL: ")
+    url = "https://www.allrecipes.com/recipe/236703/chef-johns-chicken-kiev/"
     recipe = extract_recipe(url)
     
     atomic = get_atomic_sentences(recipe)
@@ -323,7 +324,7 @@ if __name__ == "__main__":
 
     matches = get_ingredients_by_step(recipe)
 
-    print(collect_all_ingredients(matches))
+    print(recipe['ingredients'])
     meta = get_recipe_times(recipe)
 
     print("\nRECIPE METADATA:")
