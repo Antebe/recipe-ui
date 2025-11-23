@@ -1,6 +1,4 @@
-# import re
-# from typing import Optional
-# import spacy
+# query_internally.py
 from utils import *
 import re
 import spacy
@@ -88,7 +86,10 @@ def answer_recipe_question(question: str, recipe: Recipe, step_id: Optional[int]
             
             # Fall back to recipe-level ingredients
             for ing in recipe.ingredients:
+                # Check both name and raw string for matches
                 if ing.name and ingredient_name in ing.name.lower():
+                    return format_ingredient_quantity(ing)
+                if ing.raw and ingredient_name in ing.raw.lower():
                     return format_ingredient_quantity(ing)
             
             return f"I couldn't find {ingredient_name} in the recipe."
@@ -100,6 +101,17 @@ def answer_recipe_question(question: str, recipe: Recipe, step_id: Optional[int]
                 last_ing = current_step.ingredients[-1]
                 return format_ingredient_quantity(last_ing)
             return "No ingredients mentioned in this step."
+        
+        # 3b. STEP INGREDIENT LIST - "what do I need for this step?"
+        if current_step is not None and any(phrase in question_lower for phrase in [
+            "what do i need", "what do we need", "what's needed", "what is needed",
+            "ingredients for this", "ingredients for the step", "for this step"
+        ]):
+            if current_step.ingredients:
+                ing_list = ", ".join(format_ingredient_quantity(ing) for ing in current_step.ingredients)
+                return f"For this step you need: {ing_list}"
+            return "No specific ingredients mentioned for this step."
+    
     # 4. INGREDIENT LIST QUESTIONS - "what are the ingredients?"
     if any(phrase in question_lower for phrase in ["what are the ingredients", "show ingredients", "list ingredients", "what ingredients"]):
         if recipe.ingredients:
@@ -107,6 +119,7 @@ def answer_recipe_question(question: str, recipe: Recipe, step_id: Optional[int]
             return f"Ingredients: {ing_list}"
         return "No ingredients listed."
         
+    
     
     return "I'm not sure how to answer that question."
 
