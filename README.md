@@ -5,6 +5,7 @@ Making recipes navigable
 
 ```
 pip install -r reqs.txt
+python -m spacy download en_core_web_sm
 ```
 
 # Run
