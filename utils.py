@@ -164,7 +164,7 @@ def url_to_recipe(url: str) -> Recipe:
     recipe_url = url
     recipe = extract_recipe(recipe_url)
     atomic = get_atomic_sentences(recipe)
-    print("\nATOMIC SENTENCES:")
+    # print("\nATOMIC SENTENCES:")
     for i, s in enumerate(atomic, 1):
         print(f"{i}: {s}")
 
