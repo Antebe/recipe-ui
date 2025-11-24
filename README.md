@@ -61,8 +61,18 @@ What is the safe temperature for X?
 
 Conversion: e.g., what is 2 cups in ml?
 
+# Full credit requirements
 
+We are also parsing for descriptor and preparation
+```
+class Ingredient:
+    """Represents an ingredient with a name and quantity."""
+    def __init__(self, raw, name ,quantity=None, unit=None, descriptor=None, preparation=None):
+        ....
+        self.descriptor = descriptor
+        self.preparation = preparation
+```
 
-
+# Examples
 #https://www.allrecipes.com/recipe/219077/chef-johns-perfect-mashed-potatoes/
 #https://www.allrecipes.com/recipe/236703/chef-johns-chicken-kiev/
