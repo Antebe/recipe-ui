@@ -51,7 +51,7 @@ def answer_recipe_question(question: str, recipe: Recipe, step_id: Optional[int]
         # Temperature questions - "What temperature should the oven be?"
         if any(word in question_lower for word in ["temperature", "temp", "degrees"]):
             if current_step.temperature:
-                return f"{current_step.temperature}"
+                return f"{current_step.temperature} C"
             return "No temperature specified for this step."
         
         # Time questions for current step - "How long do I bake it?"
