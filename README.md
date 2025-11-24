@@ -56,3 +56,13 @@ What is X?
 How to X?
 
 what can i use instead of X?
+
+What is the safe temperature for X?
+
+Conversion: e.g., what is 2 cups in ml?
+
+
+
+
+#https://www.allrecipes.com/recipe/219077/chef-johns-perfect-mashed-potatoes/
+#https://www.allrecipes.com/recipe/236703/chef-johns-chicken-kiev/

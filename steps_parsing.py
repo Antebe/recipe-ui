@@ -72,11 +72,6 @@ def split_into_atomic_steps(text: str):
     return clean
 
 
-
-# we want to normalize before we fix coreference
-# def normalize_ing(ing):
-#     words = re.findall(r"[a-z]+", ing.lower())
-#     return words[-1] if words else ing.lower()
 def normalize_ing(ing):
     doc = nlp(ing.lower())
     # extract nouns and proper nouns
@@ -188,7 +183,7 @@ def get_atomic_sentences(recipe_dict):
     # merge headers and broken phrases
     atomic_sentences = merge_headers_and_broken_phrases(atomic_sentences)
 
-    # --- NEW FILTER HERE ---
+    #NEW FILTER HERE 
     atomic_sentences = [
         s for s in atomic_sentences 
         if not is_non_step(s)
@@ -311,9 +306,6 @@ def get_recipe_times(recipe_dict):
 
 # testing
 if __name__ == "__main__":
-    
-
-    #url = input("Enter recipe URL: ")
     url = "https://www.allrecipes.com/recipe/236703/chef-johns-chicken-kiev/"
     recipe = extract_recipe(url)
     

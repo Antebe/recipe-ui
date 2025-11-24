@@ -1,3 +1,4 @@
+#main.py
 from utils import *
 from query_internally import *
 from search_router import *
@@ -13,7 +14,7 @@ def main():
     while True:
         user_input = input("User: ").strip()
 
-        # --- Exit program ---
+        # Exit program
         if user_input.lower() in ["exit", "quit"]:
             print("Bot: Goodbye!")
             break
@@ -38,7 +39,7 @@ def main():
             print("Bot: Please load a recipe first using: load <URL>")
             continue
 
-        # MENU SELECTION (1 or 2)
+        # MENU SELECTION (1, 2 or 3)
         if user_input == "1":
             print(f"Bot: Ingredients:\n")
             for ing in state.recipe.ingredients:

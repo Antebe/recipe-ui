@@ -81,13 +81,7 @@ def sentence_to_step(sentence: str, step_number: int = 1) -> Step:
         elif ent.label_ == "QUANTITY" or "°" in ent.text:
             temperature = ent.text
 
-    # Heuristic ingredient recognition (we will use a precompiled list later)
     ingredients = []
-    # for token in doc:
-    #     #print(token.text, token.dep_, token.pos_)
-    #     if token.dep_ in {"dobj", "pobj", "conj"} and token.pos_ == "NOUN":
-    #         ingredients.append(Ingredient(raw=token.text, name=token.lemma_))
-
     step = Step(
         step_number=step_number,
         text=sentence,
@@ -130,29 +124,28 @@ def text_to_ingredient(text):
         else:
             tokens_left.append(token)
 
-    # pass 2: from the remaining tokens, pick last NOUN as name
+    # pass 2: from the remaining tokens, pick the noun AFTER a unit (if exists), otherwise last NOUN
     name = None
     descriptors = []
+    found_unit = False
 
-    for token in tokens_left:
-        if token.pos_ == "NOUN":
+    for i, token in enumerate(tokens_left):
+        if found_unit and token.pos_ == "NOUN":
             name = token.lemma_
+            found_unit = False
+        elif unit and i > 0 and tokens_left[i-1].lemma_.lower() in UNITS and token.pos_ == "NOUN":
+            name = token.lemma_
+        elif token.pos_ == "NOUN":
+            name = token.lemma_  # fallback to last noun
         else:
             descriptors.append(token.text)
-
-    # if no noun found, fall back to all text
-    if name is None and tokens_left:
-        name = tokens_left[-1].lemma_
-        descriptors = [t.text for t in tokens_left[:-1]]
-
-    descriptor = " ".join(descriptors) if descriptors else None
 
     return Ingredient(
         raw=text,
         name=name,
         quantity=quantity,
         unit=unit,
-        descriptor=descriptor,
+        descriptor=" ".join(descriptors) if descriptors else None,
         preparation=None,
     )
 
@@ -164,7 +157,7 @@ def url_to_recipe(url: str) -> Recipe:
     recipe_url = url
     recipe = extract_recipe(recipe_url)
     atomic = get_atomic_sentences(recipe)
-    # print("\nATOMIC SENTENCES:")
+    print("\nATOMIC SENTENCES:")
     for i, s in enumerate(atomic, 1):
         print(f"{i}: {s}")
 
