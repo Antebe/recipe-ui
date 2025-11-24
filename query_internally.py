@@ -125,8 +125,6 @@ def answer_recipe_question(question: str, recipe: Recipe, step_id: Optional[int]
 
 
 def extract_ingredient_from_question(question_lower: str, doc) -> Optional[str]:
-    """Extract ingredient name from question using NLP."""
-    # Skip question words and common non-ingredient nouns
     skip_words = {
         "much", "many", "step", "recipe", "question", "amount", "quantity",
         "time", "temperature", "minutes", "hours", "degrees", "oven", "it",
