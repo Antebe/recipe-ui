@@ -2,82 +2,65 @@
 from utils import *
 from query_internally import *
 from search_router import *
+from llm_client import ask_gemini
+from extract import extract_recipe
 
+def build_system_prompt(recipe_text: str) -> str:
+    return f"""
+You are a COOKING ASSISTANT. Stay only in the recipe text. You help users understand steps, ingredients, quantities and you guide them through the recipe conversationally.
+Do not make up ingredients or steps that are not in the html. You can explain how to perform cooking actions.You can summarize steps, ingredients, or guide the user. 
+
+Here is the recipe context:
+
+{recipe_text}
+
+Wait for the next user question and answer based only on this recipe.
+"""
 
 
 def main():
-    print("=== Recipe Chat CLI ===")
+    print("=== LLM-Only Recipe Assistant ===")
     print("Type 'exit' to quit.\n")
 
-    state = None
+    system_prompt = ""
+    recipe_loaded = False
 
     while True:
         user_input = input("User: ").strip()
 
-        # Exit program
         if user_input.lower() in ["exit", "quit"]:
             print("Bot: Goodbye!")
             break
 
-        # LOAD A RECIPE
+        # Load recipe
         if user_input.startswith("load "):
             url = user_input.replace("load", "").strip()
-
             print("Bot: Loading recipe...")
-            recipe = url_to_recipe(url)
-            state = RecipeState(recipe)
 
-            print(f"Bot: Loaded recipe -> \"{recipe.title}\".")
-            print("Bot: What would you like to do?")
-            print("  [1] Show ingredients")
-            print("  [2] Walk through steps")
-            print("  [3] Show a recipe summary")
+            recipe = extract_recipe(url)
+            system_prompt = build_system_prompt(recipe)
+            recipe_loaded = True
+
+            print("Bot: Recipe loaded. Ask me anything!")
             continue
 
-        # If no recipe yet
-        if state is None:
+        if not recipe_loaded:
             print("Bot: Please load a recipe first using: load <URL>")
             continue
 
-        # MENU SELECTION (1, 2 or 3)
-        if user_input == "1":
-            print(f"Bot: Ingredients:\n")
-            for ing in state.recipe.ingredients:
-                print(" -", ing.raw)
-            continue
-
-        if user_input == "2":
-            state.current_step = 1
-            print(f"Bot: Step 1: {state.recipe.steps[0].text}")
-            continue
-
-        if user_input == "3":
-            summary = state.recipe
-            print("Bot: Recipe Summary:\n")
-            for step in summary.steps:
-                print(f" Step {step.step_number}: {step.text}")
-            continue
-        # STEP NAVIGATION (internal)
-        nav_answer, new_step = answer_navigation_question(user_input, state)
-        if nav_answer != "I can’t tell how to navigate from that.":
-            print("Bot:", nav_answer)
-            continue
-
-        # SEARCH ROUTING (external)
-        routed = route_question(user_input)
-        if routed["route"] == "search":
-            print("Bot: I found external references for you:")
-            print("  Google:", routed["google"])
-            print("  YouTube:", routed["youtube"])
-            continue
-
-        # INTERNAL RECIPE QA
-        answer = answer_recipe_question(
-            user_input,
-            state.recipe,
-            state.current_step
+        # Build full LLM prompt
+        full_prompt = (
+            system_prompt
+            + "\n\nUSER QUESTION:\n"
+            + user_input
+            + "\n\nASSISTANT ANSWER:\n"
         )
-        print("Bot:", answer)
+
+        bot_reply = ask_gemini(full_prompt)
+        print("Bot:", bot_reply)
+
+
 
 if __name__ == "__main__":
     main()
+
