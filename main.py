@@ -31,7 +31,7 @@ def main():
     while True:
         user_input = input("User: ").strip()
 
-        if user_input.lower() in ["exit", "quit"]:
+        if user_input.lower() in ["exit", "quit", "bye"]:
             print("Bot: Goodbye!")
             break
 
