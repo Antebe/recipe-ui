@@ -20,6 +20,7 @@ Wait for the next user question and answer based only on this recipe.
 """
 
 
+
 def main():
     print("=== LLM-Only Recipe Assistant ===")
     print("Type 'exit' to quit.\n")
@@ -58,8 +59,11 @@ def main():
             + "\n\nASSISTANT ANSWER:\n"
         )
 
+        #print(full_prompt)
         bot_reply = ask_gemini(full_prompt)
         print("Bot:", bot_reply)
+
+        system_prompt += f"\n\nUSER QUESTION:\n{user_input}\n\nASSISTANT ANSWER:\n{bot_reply}\n"
 
 
 
