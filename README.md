@@ -8,6 +8,12 @@ Part 1 -- borrow rerouting to Google and YouTube; keep step navigation idea
 
 Part 2 -- Use Gemini as a parser
 
+# 3 capabilities
+Flexible wording for navigation and ingredients clarification
+Reduced hallucinations by rerouting to Google/Youtube to clarify an action
+Breakdown steps per request 
+
+
 # Set-up
 
 ```
@@ -24,13 +30,6 @@ For the CLI interface, please run this command:
 python main.py
 ```
 
-# Recipe Retrieval and Display
-
-  [1] Show ingredients
-
-  [2] Walk through steps
-
-  [3] Show a recipe summary
 
 # Navigation
 
@@ -70,17 +69,6 @@ What is the safe temperature for X?
 
 Conversion: e.g., what is 2 cups in ml?
 
-# Full credit requirements
-
-We are also parsing for descriptor and preparation
-```
-class Ingredient:
-    """Represents an ingredient with a name and quantity."""
-    def __init__(self, raw, name ,quantity=None, unit=None, descriptor=None, preparation=None):
-        ....
-        self.descriptor = descriptor
-        self.preparation = preparation
-```
 
 # Examples
 #https://www.allrecipes.com/recipe/219077/chef-johns-perfect-mashed-potatoes/
