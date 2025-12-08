@@ -5,6 +5,7 @@ GitHub: https://github.com/Antebe/recipe-ui/tree/part2
 
 From 
 Part 1 -- borrow rerouting to Google and YouTube; keep step navigation idea
+
 Part 2 -- Use Gemini as a parser
 
 # Set-up
