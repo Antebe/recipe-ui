@@ -85,7 +85,7 @@ def main():
             + "\n\nASSISTANT ANSWER:\n"
         )
 
-        print(full_prompt)
+        #print(full_prompt)
         bot_reply = ask_gemini(full_prompt)
         print("Bot:", bot_reply)
 
