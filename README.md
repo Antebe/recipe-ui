@@ -1,6 +1,12 @@
 # recipe-ui
-Making recipes navigable
+Making recipes navigable PART 3
 GitHub: https://github.com/Antebe/recipe-ui/tree/part2
+# Main Changes
+
+From 
+Part 1 -- borrow rerouting to Google and YouTube; keep step navigation idea
+Part 2 -- Use Gemini as a parser
+
 # Set-up
 
 ```
