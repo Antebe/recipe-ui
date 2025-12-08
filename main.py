@@ -1,4 +1,5 @@
 #main.py
+from pydoc import text
 from utils import *
 from query_internally import *
 from search_router import *
@@ -51,6 +52,13 @@ def main():
             print("Bot: Please load a recipe first using: load <URL>")
             continue
 
+        result = route_question(user_input)
+        if result["route"] == "search":
+            print(f"[SEARCH] intent={result['intent']}")
+            print("  Google :", result["google"])
+            print("  YouTube:", result["youtube"])
+            continue
+        
         # Build full LLM prompt
         full_prompt = (
             system_prompt
